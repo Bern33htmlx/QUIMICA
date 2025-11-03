@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Detector de Reacciones químicas — Laboratorio virtual</title>
+  <style>
+    /* * TEMA: LABORATORIO UNIVERSITARIO (v4)
+     * ¡Tono más oscuro y patrón de fondo MUY NOTORIO!
+    */
+    :root {
+      /* Paleta más oscura */
+      --bg-start: #b8c6d6;  /* Gris azulado medio */
+      --bg-end: #a0c4c0;    /* Verde azulado medio */
+      --card: #ffffff;      /* Tarjetas en blanco puro para contraste */
+      --accent: #10b981;    /* Verde (sigue siendo el acento principal) */
+      --muted: #5a6a7e;    /* Texto gris/azul más oscuro */
+      --paper: #111827;      /* Texto principal (oscuro) */
+      --glass: #f0fdf4;      /* Fondo verde pálido (para helpers) */
+      --accent-2: #fbbf24;  /* Amarillo sol (sigue siendo acento secundario) */
+      --border-color: #d0d8e0; /* Borde más oscuro */
+    }
+
+    * { box-sizing: border-box; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+    
+    /* * === ¡AQUÍ ESTÁ EL CAMBIO! ===
+     * 1. Gradiente de fondo oscuro.
+     * 2. Patrón SVG actualizado:
+     * - stroke='rgba(255%2C255%2C255%2C0.4)' (Blanco con 40% opacidad)
+     * - stroke-width='1.5' (línea más gruesa)
+    */
+    html, body {
+      height: 100%;
+      margin: 0;
+      /* Capa 1: Patrón de hexágonos BLANCO Y NOTORIO */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 60 104'%3E%3Cg fill='none' stroke='rgba(255%2C255%2C255%2C0.4)' stroke-width='1.5'%3E%3Cpath d='M30 2V0M30 104v-2M0 53h2M60 53h-2M15 19.5v-2M45 19.5v-2M15 86.5v2M45 86.5v2M1.5 35l-2-3.46M58.5 35l2-3.46M1.5 71l-2 3.46M58.5 71l2 3.46M30 20.5a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM30 85.5a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM15 35.5a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM45 35.5a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM15 70.5a10 10 0 1 0 0 20 10 10 0 0 0 0 20zM45 70.5a10 10 0 1 0 0 20 10 10 0 0 0 0 20z'/%3E%3C/g%3E%3C/svg%3E"),
+      /* Capa 2: Gradiente de fondo MÁS OSCURO */
+        linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      background-repeat: repeat, no-repeat;
+      background-attachment: fixed, fixed;
+      color: var(--paper);
+      line-height: 1.5;
+    }
+    
+  /* ocupar toda la pantalla: layout columnar con header, grid scrollable y footer fijo al final */
+  .container { width: 100vw; height: 100vh; margin: 0; padding: 18px; box-sizing: border-box; display:flex; flex-direction:column; }
+
+    header { display: flex; gap: 16px; align-items: center }
+    
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #012;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+    
+    h1 { margin: 0; font-size: 24px; font-weight: 700; color: #0c4a6e; }
+    p.lead { color: var(--muted); margin-top: 6px; font-size: 15px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 420px; gap: 18px; margin-top: 18px; flex: 1 1 auto; overflow: auto; }
+    
+    /* Tarjetas de color blanco puro */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--muted); font-weight: 500; }
+    
+    /* Textarea con borde actualizado */
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px dashed var(--border-color);
+      background: #ffffff; /* Fondo blanco para legibilidad */
+      color: var(--paper);
+      resize: vertical;
+      font-size: 14px;
+    }
+    textarea:focus {
+        border-color: var(--accent-2); 
+        outline: none;
+    }
+
+    .row { display: flex; gap: 8px; align-items: center }
+    
+    button.btn {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    button.btn:hover {
+        background: #0f766e; 
+        transform: scale(1.03);
+    }
+
+    /* Botón fantasma con borde actualizado */
+    button.ghost {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+    button.ghost:hover {
+        background: #f0f4f8;
+        color: var(--paper);
+    }
+    .small { font-size: 13px; padding: 6px 8px }
+
+    .helpers { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px }
+    
+    .helpers button {
+      background: var(--glass);
+      border: 1px solid #a7f3d0;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: #065f46; 
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .helpers button:hover {
+        background: #d1fae5;
+    }
+
+    .preview {
+      background: var(--glass);
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid var(--accent);
+      min-height: 52px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 15px;
+    }
+    .preview small { font-size: 12px; color: var(--muted); }
+
+    /* mensajes de error inline */
+    .error { margin-top:8px; padding:8px 10px; border-radius:8px; background:#ffecec; color:#7a1f1f; border:1px solid #f5c6cb; display:none }
+
+    .result-title { display: flex; align-items: center; gap: 12px }
+    
+    .badge {
+      background: var(--glass);
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--accent);
+      font-weight: 700;
+      border: 1px solid var(--accent);
+      font-size: 14px;
+    }
+
+    .steps { margin-top: 12px; background: #ffffff; padding: 10px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border-color); }
+    .step { padding: 10px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 8px; background: #ffffff; }
+    .step strong { color: var(--accent); }
+
+    /* right column */
+    .right { position: sticky; top: 24px }
+    
+    .file-drop {
+      border: 2px dashed var(--accent);
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+      background: #fafffc;
+    }
+    .file-drop label strong { color: var(--accent); }
+
+    input[type=file] { display: none }
+    .img-preview { max-width: 100%; display: block; margin: 12px auto; border-radius: 8px; border: 1px solid var(--border-color); }
+
+    hr { border: none; border-top: 1px solid var(--border-color); margin: 16px 0 }
+    footer { margin-top: 18px; color: var(--muted); font-size: 13px; text-align: center; }
+    
+    ul { padding-left: 20px; }
+    li { margin-bottom: 4px; }
+    code { background: #eef2f6; padding: 2px 6px; border-radius: 4px; color: #475569; }
+
+    /* responsive */
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .right { position: relative; top: auto }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">🧪</div>
+      <div>
+        <h1>Detector de reacciones químicas — Ambiente: Curso de Química</h1>
+        <p class="lead">Sube una foto o escribe la reacción. El sistema intentará identificar el tipo de reacción
+          (síntesis/descomposición, redox, ácido‑base, doble/simple sustitución, combustión, precipitación) y explicar los pasos.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <label for="eq">1) Escribe la reacción (usa botones de subíndice para facilitar):</label>
+        <textarea id="eq" placeholder="Ejemplo: 2H₂ + O₂ -> 2H₂O"></textarea>
+        <div class="helpers" aria-hidden>
+          <button data-insert="₂">₂</button>
+          <button data-insert="₃">₃</button>
+          <button data-insert="₄">₄</button>
+          <button data-insert="₅">₅</button>
+          <button data-insert="₆">₆</button>
+          <button data-insert="(s)"> (s) </button>
+          <button data-insert="(l)"> (l) </button>
+          <button data-insert="(g)"> (g) </button>
+          <button data-insert="(aq)"> (aq) </button>
+          <button id="formatBtn">Convertir a formato químico (preview)</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:14px;align-items:center">
+          <button class="btn" id="analyze">Analizar reacción</button>
+          <button class="ghost" id="clear">Limpiar</button>
+          <div style="margin-left:auto;color:var(--muted);font-size:13px">SCC aplicado: hoja de estilo modular y diseño accesible</div>
+        </div>
+
+        <div style="margin-top:16px">
+          <label>Previsualización:</label>
+          <div id="errorMsg" class="error" role="alert"></div>
+          <div class="preview" id="preview" aria-live="polite"></div>
+        </div>
+
+        <div id="result" style="margin-top:16px;display:none">
+          <div class="result-title">
+            <div class="badge" id="typeBadge">TIPO</div>
+            <div style="flex:1"><strong id="typeMain" style="font-size: 18px;">-</strong><div style="color:var(--muted);font-size:13px" id="confidence">Confianza: -</div>
+            <div id="balancedEq" style="margin-top:8px;font-family: 'Courier New', monospace; font-size:14px;color:var(--muted)"></div>
+            </div>
+          </div>
+
+          <div class="steps" id="explanation"></div>
+        </div>
+
+      </div>
+
+      <aside class="right">
+        <div class="card">
+          <label>2) O sube una foto de la reacción (fotografía clara con texto legible):</label>
+          <div class="file-drop">
+            <label for="photoInput" style="cursor:pointer"><strong>Hacer clic para seleccionar o arrastrar</strong></label>
+            <input id="photoInput" type="file" accept="image/*">
+            <img id="imgPreview" class="img-preview" alt="previsualización" style="display:none" />
+            <div style="font-size:13px;color:var(--muted);margin-top:8px">La página usará OCR en el navegador para extraer texto (Tesseract.js). Resultado editable.</div>
+            <div style="margin-top:10px;display:flex;gap:8px;justify-content:center">
+              <button class="ghost small" id="runOCR">Extraer texto (OCR)</button>
+              <button class="ghost small" id="insertOCR">Insertar al campo</button>
+              <button class="ghost small" id="cancelOCR" style="display:none">Cancelar OCR</button>
+            </div>
+            <progress id="ocrProgress" value="0" max="1" style="width:100%;display:none;margin-top:8px;height: 8px;"></progress>
+          </div>
+
+          <hr>
+          <label>Consejos rápidos:</label>
+          <ul style="color:var(--muted);font-size:13px">
+            <li>Escribe las flechas como -> o →</li>
+            <li>Usa coeficientes al inicio de cada especie (si los conoces)</li>
+            <li>Ejemplos: <code>AgNO₃ + NaCl -> AgCl(s) + NaNO₃</code></li>
+            <li>El OCR funciona mejor con texto impreso y contraste alto.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <label>Detalles técnicos</label>
+          <div style="font-size:13px;color:var(--muted)">Heurísticas en cliente: balanceo no garantizado, reglas de solubilidad reducidas, números de oxidación calculados con reglas simplificadas. Para mayor precisión se recomienda añadir un backend con RDKit / OPSIN / base de datos.</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div>Creado para un ambiente de curso: interfaz didáctica, explicaciones paso a paso y herramientas de entrada simplificadas.</div>
+      <div style="margin-top:8px;color:var(--muted)">Nota: el sistema es heurístico — puede fallar en reacciones orgánicas complejas o en notaciones poco habituales.</div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+  <script>
+    // utilidades: insertar en textarea
+    const eq = document.getElementById('eq');
+    document.querySelectorAll('[data-insert]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.getAttribute('data-insert');
+        const start = eq.selectionStart, end = eq.selectionEnd;
+        const before = eq.value.slice(0, start), after = eq.value.slice(end);
+        eq.value = before + v + after;
+        eq.focus();
+        eq.selectionStart = eq.selectionEnd = start + v.length;
+        updatePreview();
+      })
+    });
+
+    document.getElementById('formatBtn').addEventListener('click', () => updatePreview(true));
+    document.getElementById('clear').addEventListener('click', () => { eq.value = ''; updatePreview(); document.getElementById('result').style.display = 'none'; });
+
+    function htmlSafe(str) { return str.replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function toChemPreview(text) {
+      // convierte subíndices numéricos Unicode y parentesis a HTML adecuado (simple)
+      const map = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9' };
+      // Convertir guiones y flechas
+      let t = htmlSafe(text).replace(/->|→/g, ' → ');
+      // Reemplazar subíndices Unicode por <sub>
+      t = t.replace(/([A-Za-z0-9\)\]\}])([₀₁₂₃₄₅₆₇₈₉]+)/g, (m, p, q) => {
+        // q contiene chars subscript
+        let digits = ''; for (const ch of q) digits += map[ch] || ch;
+        return p + '<sub>' + digits + '</sub>';
+      });
+      // charge at end like ^2- or 2- or + as superscript
+      t = t.replace(/(\^?(\d+)?([+-]))$/g, (m, p, num, sign) => {
+        return '<sup>' + (num ? num : '') + sign + '</sup>';
+      });
+      // (aq) etc to <small>
+      t = t.replace(/\((aq|s|l|g)\)/gi, ' <small>($1)</small>');
+      return t;
+    }
+
+    function updatePreview(asHtml) {
+      const p = document.getElementById('preview');
+      const err = document.getElementById('errorMsg'); if(err){ err.style.display='none'; err.textContent=''; }
+      if (!eq.value.trim()) { p.innerHTML = '<span style="color:var(--muted)">Aquí aparecerá la previsualización de tu ecuación.</span>'; return; }
+      p.innerHTML = toChemPreview(eq.value);
+    }
+    updatePreview();
+
+    // Parsing básico de ecuaciones
+    function splitSides(text) {
+      const arrow = text.includes('->') ? '->' : (text.includes('→') ? '→' : null);
+      if (!arrow) return null;
+      const parts = text.split(/->|→/);
+      if (parts.length < 2) return null;
+      return { lhs: parts[0].trim(), rhs: parts.slice(1).join('→').trim() };
+    }
+
+    function parseSpecies(side) {
+      return side.split('+').map(s => s.trim()).filter(Boolean).map(s => {
+        // detect coefficient e.g. 2H2O
+        const m = s.match(/^\s*(\d+)\s*(.*)$/);
+        let coef = 1, formula = s;
+        if (m) { coef = parseInt(m[1]); formula = m[2]; }
+        // detect charge suffix like ^2- or 2- or +
+        let formulaRaw = formula.replace(/\s/g,'');
+        let charge = 0;
+        const chargeMatch = formulaRaw.match(/(.*?)(?:\^?(\d+)([+-])|([+-]))\s*$/);
+        if(chargeMatch){
+          if(chargeMatch[2] && chargeMatch[3]){ charge = parseInt(chargeMatch[2],10) * (chargeMatch[3]==='+'? 1 : -1); formulaRaw = chargeMatch[1]; }
+          else if(chargeMatch[4]){ charge = (chargeMatch[4]==='+'? 1 : -1); formulaRaw = (chargeMatch[1] || '').trim(); }
+        }
+        return { raw: s, coef, formula: formulaRaw, charge };
+      });
+    }
+
+    // Very small solubility hints
+    const insoluble = ["AgCl", "PbCl2", "BaSO4", "CaSO4", "AgBr", "AgI"];
+
+    function isLikelyIonic(formula) {
+      // heuristic: presence of uppercase followed by lowercase or common polyatomic
+      return /[A-Z][a-z]?\d*/.test(formula) && /[A-Z]/.test(formula); // naive
+    }
+
+    // parse element counts: supports simple parentheses groups like Ca(OH)2 and nested groups
+    function elementCounts(formula) {
+      // remove whitespace
+      formula = (formula || '').replace(/\s+/g,'');
+      const stack = [{}];
+      const tokenRegex = /(\()|(\))|([A-Z][a-z]?)|(\d+)/g;
+      let m;
+      while ((m = tokenRegex.exec(formula))) {
+        if (m[1]) { // '('
+          stack.push({});
+        } else if (m[2]) { // ')'
+          const group = stack.pop() || {};
+          // check for multiplier right after )
+          const rest = formula.slice(tokenRegex.lastIndex);
+          const mm = rest.match(/^(\d+)/);
+          let mult = 1;
+          if (mm) { mult = parseInt(mm[1],10); tokenRegex.lastIndex += mm[1].length; }
+          const top = stack[stack.length-1] || {};
+          for (const el in group) { top[el] = (top[el] || 0) + group[el] * mult; }
+        } else if (m[3]) { // element
+          const el = m[3];
+          // look for count after element
+          const rest = formula.slice(tokenRegex.lastIndex);
+          const mm = rest.match(/^(\d+)/);
+          let num = 1;
+          if (mm) { num = parseInt(mm[1],10); tokenRegex.lastIndex += mm[1].length; }
+          const top = stack[stack.length-1] || {};
+          top[el] = (top[el] || 0) + num;
+        } else if (m[4]) {
+          // stray number handled in lookahead; ignore
+        }
+      }
+      return stack[0] || {};
+    }
+
+    // validation for input equation: arrow presence and balanced parentheses
+    function validateEquation(text){
+      const trimmed = (text||'').trim();
+      if(!trimmed) return { ok:false, msg: 'La ecuación está vacía.' };
+      if(!/->|→/.test(trimmed)) return { ok:false, msg: 'No se detectó una flecha. Usa -> ó → para separar reactivos y productos.' };
+      // simple parentheses balance
+      let bal = 0; for(const ch of trimmed){ if(ch==='(') bal++; if(ch===')') bal--; if(bal<0) return { ok:false, msg: 'Paréntesis desbalanceados (hay ) antes de () abierto).' }; }
+      if(bal !== 0) return { ok:false, msg: 'Paréntesis desbalanceados en la ecuación.' };
+      return { ok:true };
+    }
+
+    // clean OCR output: normalize arrows and subscripts to ASCII digits
+    function cleanOcrText(text){
+      if(!text) return '';
+      // normalize different arrow/hyphen variants to ->
+      text = text.replace(/[→➔➝➜—–−‐]/g, '->');
+      // map unicode subscripts to digits
+      const map = { '₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9' };
+      text = text.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, ch => map[ch] || ch);
+      // normalize superscript plus/minus and superscript digits to simple form
+      const supMap = { '¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁰':'0','⁺':'+','⁻':'-' };
+      text = text.replace(/[¹²³⁴⁵⁶⁷⁸⁹⁰⁺⁻]/g, ch => supMap[ch] || ch);
+      // remove control chars
+      text = text.replace(/[\u200B-\u200F\uFEFF]/g,'');
+      // trim and collapse multiple spaces
+      text = text.replace(/\s+/g,' ').trim();
+      return text;
+    }
+
+    // Oxidation state (very naive): uses simple rules: H +1, O -2, F -1, alkali +1, alkaline earth +2, else 0 if elemental
+    function guessOxidation(element, formula) {
+      const alkali = ['Li', 'Na', 'K', 'Rb', 'Cs', 'Fr'];
+      const alk2 = ['Be', 'Mg', 'Ca', 'Sr', 'Ba', 'Ra'];
+      if (element === 'O') return -2;
+      if (element === 'H') return +1;
+      if (element === 'F') return -1;
+      if (alkali.includes(element)) return +1;
+      if (alk2.includes(element)) return +2;
+      if (element === 'Cl' || element === 'Br' || element === 'I') return -1; // simplification
+      return 0;
+    }
+
+    function computeOxidationForFormula(formula) {
+      // sum guess to make neutral — this is an approximation and fails for polyatomics/charged species
+      const counts = elementCounts(formula);
+      const ox = {};
+      for (const el in counts) ox[el] = guessOxidation(el, formula);
+      return ox;
+    }
+
+    function analyzeReaction(text) {
+      const sides = splitSides(text);
+      if (!sides) return { error: 'No se detectó una flecha (-> o →).' };
+      const lhs = parseSpecies(sides.lhs);
+      const rhs = parseSpecies(sides.rhs);
+
+      const details = { lhs, rhs, steps: [], candidates: [], confidence: 0 };
+
+      // heurística síntesis/descomposición
+      if (lhs.length > 1 && rhs.length === 1) { details.candidates.push('Síntesis'); details.steps.push('Hay varios reactivos y un único producto: patrón de síntesis.'); details.confidence += 0.8; }
+      if (lhs.length === 1 && rhs.length > 1) { details.candidates.push('Descomposición'); details.steps.push('Un reactivo produce varios productos: patrón de descomposición.'); details.confidence += 0.8; }
+
+      // combustión
+      const lhsStr = sides.lhs.toLowerCase();
+      if (/\bO2\b/i.test(sides.lhs) && /CO2|H2O/i.test(sides.rhs)) { details.candidates.push('Combustión'); details.steps.push('O₂ en reactivos y CO₂/H₂O en productos → reacción de combustión probable.'); details.confidence += 0.9; }
+
+      // doble sustitución / precipitación (naive)
+      if (lhs.length === 2 && lhs.every(s => isLikelyIonic(s.formula))) {
+        // check if any product is known insoluble
+        const precip = rhs.map(r => r.formula).find(f => insoluble.includes(f));
+        if (precip) { details.candidates.push('Doble sustitución / precipitación'); details.steps.push('Intercambio iónico y se detectó un posible precipitado: ' + precip + '.'); details.confidence += 0.85; }
+        else { details.candidates.push('Probable doble sustitución (metátesis)'); details.steps.push('Ambas especies parecen compuestos iónicos; podría ocurrir intercambio iónico.'); details.confidence += 0.5; }
+      }
+
+      // simple sustitución (elemento puro + compuesto)
+      if (lhs.some(s => /^([A-Z][a-z]?)$/.test(s.formula)) && rhs.some(r => r.formula.includes(lhs.find(s => /^([A-Z][a-z]?)$/.test(s.formula)).formula))) {
+        details.candidates.push('Sustitución simple (desplazamiento)'); details.steps.push('Elemento en forma elemental reemplaza a otro elemento en un compuesto.'); details.confidence += 0.7;
+      }
+
+      // ácido-base (naive): H+ and OH- => water
+      if (/H[A-Z0-9a-z]*\b/.test(lhs.map(s => s.formula).join(' ')) && /OH/.test(lhs.map(s => s.formula).join(' ')) && /H2O/.test(sides.rhs)) {
+        details.candidates.push('Neutralización ácido‑base'); details.steps.push('Se detecta presencia de un ácido y una base (OH) y agua entre los productos.'); details.confidence += 0.9;
+      }
+
+      // redox: compute some oxidation changes
+      try {
+        const elements = new Set();
+        lhs.forEach(s => { Object.keys(elementCounts(s.formula)).forEach(e => elements.add(e)) });
+        rhs.forEach(s => { Object.keys(elementCounts(s.formula)).forEach(e => elements.add(e)) });
+        const lhsOx = {}; const rhsOx = {};
+        elements.forEach(el => {
+          // take first species containing el
+          const inL = lhs.find(s => elementCounts(s.formula)[el]);
+          const inR = rhs.find(s => elementCounts(s.formula)[el]);
+          if (inL) lhsOx[el] = computeOxidationForFormula(inL.formula)[el] || 0; else lhsOx[el] = null;
+          if (inR) rhsOx[el] = computeOxidationForFormula(inR.formula)[el] || 0; else rhsOx[el] = null;
+        });
+        let inc = 0, dec = 0;
+        for (const el of elements) { if (lhsOx[el] !== null && rhsOx[el] !== null) { if (rhsOx[el] > lhsOx[el]) inc++; if (rhsOx[el] < lhsOx[el]) dec++; } }
+        if (inc > 0 && dec > 0) { details.candidates.push('Redox (reacción de oxidación‑reducción)'); details.steps.push('Se detectaron cambios de números de oxidación en distintos elementos.'); details.confidence += 0.85; details.oxChanges = { lhsOx, rhsOx }; }
+      } catch (e) { /* ignore */ }
+
+      // score/selección
+      details.confidence = Math.min(1, details.confidence || 0.2);
+      // choose best candidate by confidence heuristics (prefer high-confidence entries)
+      const sorted = details.candidates.slice();
+      // unique
+      const uniq = [...new Set(sorted)];
+      details.best = uniq.length ? uniq[0] : 'No determinado';
+
+      return details;
+    }
+
+    // ===== Balanceo automático (preciso con fracciones racionales) =====
+    // BigInt gcd
+    function gcdBig(a,b){ a = a<0n?-a:a; b = b<0n?-b:b; while(b){ const t = a % b; a = b; b = t; } return a; }
+    function lcmBig(a,b){ return (a/gcdBig(a,b)) * b; }
+
+    class Frac {
+      constructor(n,d=1){ this.n = BigInt(n); this.d = BigInt(d); if(this.d<0n){ this.n = -this.n; this.d = -this.d } this.normalize(); }
+      normalize(){ const g = gcdBig(this.n<0n?-this.n:this.n, this.d<0n?-this.d:this.d); if(g>1n){ this.n /= g; this.d /= g; } }
+      add(o){ return new Frac(this.n*o.d + o.n*this.d, this.d*o.d); }
+      sub(o){ return new Frac(this.n*o.d - o.n*this.d, this.d*o.d); }
+      mul(o){ return new Frac(this.n*o.n, this.d*o.d); }
+      div(o){ return new Frac(this.n*o.d, this.d*o.n); }
+      neg(){ return new Frac(-this.n, this.d); }
+      isZero(){ return this.n === 0n; }
+      toString(){ return this.n.toString() + '/' + this.d.toString(); }
+    }
+
+    function rrefMatrix(M){
+      const m = M.length, n = M[0].length;
+      let row = 0;
+      for(let col=0; col<n && row<m; col++){
+        // find pivot
+        let sel = -1; for(let i=row;i<m;i++) if(!M[i][col].isZero()){ sel = i; break; }
+        if(sel===-1) continue;
+        // swap
+        const tmp = M[sel]; M[sel] = M[row]; M[row] = tmp;
+        // normalize pivot to 1
+        const piv = M[row][col];
+        for(let j=col;j<n;j++) M[row][j] = M[row][j].div(piv);
+        // eliminate other rows
+        for(let i=0;i<m;i++) if(i!==row){ const factor = M[i][col]; if(!factor.isZero()){ for(let j=col;j<n;j++) M[i][j] = M[i][j].sub(factor.mul(M[row][j])); } }
+        row++;
+      }
+      return M;
+    }
+
+    function balanceEquationRational(text){
+      const sides = splitSides(text); if(!sides) return null;
+      const lhs = parseSpecies(sides.lhs); const rhs = parseSpecies(sides.rhs);
+      const species = lhs.concat(rhs);
+      const elems = [];
+      species.forEach(s=>{ const c = elementCounts(s.formula); Object.keys(c).forEach(e=>{ if(!elems.includes(e)) elems.push(e); }); });
+      if(elems.length===0) return null;
+      const n = species.length;
+      // build matrix A rows for each element (reactants positive, products negative)
+      const A = elems.map((el, i) => Array.from({length:n}, (_,j)=>{
+        const cnt = BigInt(elementCounts(species[j].formula)[el] || 0);
+        return new Frac(j < lhs.length ? cnt : -cnt, 1);
+      }));
+
+      // if any species has a non-zero ionic charge, add an extra row to enforce net charge conservation
+      const hasCharge = species.some(s => s.charge && Number(s.charge) !== 0);
+      if(hasCharge){
+        const chargeRow = Array.from({length:n}, (_,j) => {
+          const ch = BigInt(species[j].charge || 0);
+          return new Frac(j < lhs.length ? ch : -ch, 1);
+        });
+        A.push(chargeRow);
+      }
+
+      // compute RREF of A (work on a fresh matrix copy)
+      const M = A.map(row => row.map(cell => new Frac(cell.n, cell.d)));
+      rrefMatrix(M);
+      // identify pivot columns
+      const pivotCols = new Array(m).fill(-1);
+      for(let i=0;i<m;i++){
+        for(let j=0;j<n;j++) if(!M[i][j].isZero()){ pivotCols[i]=j; break; }
+      }
+      const pivSet = new Set(pivotCols.filter(v=>v>=0));
+      const freeCols = [];
+      for(let j=0;j<n;j++) if(!pivSet.has(j)) freeCols.push(j);
+      if(freeCols.length===0) return null; // only trivial solution
+      // choose first free column as 1
+      const free = freeCols[0];
+      const x = Array(n).fill(null).map(_=> new Frac(0,1));
+      x[free] = new Frac(1,1);
+      // back-substitute: for each pivot row i with pivot p, x[p] = - sum_{j free} M[i][j]*x[j]
+      for(let i=0;i<m;i++){
+        const p = pivotCols[i]; if(p<0) continue;
+        let sum = new Frac(0,1);
+        for(const j of freeCols){ sum = sum.add(M[i][j].mul(x[j] || new Frac(0,1))); }
+        x[p] = sum.neg();
+      }
+      // collect denominators lcm
+      let common = 1n;
+      for(const xi of x){ if(!xi) continue; common = lcmBig(common, xi.d); }
+      if(common===0n) return null;
+      const ints = x.map(xi => { if(!xi) return 0n; return (xi.n * (common/xi.d)); });
+      // make all positive by flipping sign if needed
+      // find gcd of absolute ints
+      let g = 0n; for(const v of ints) g = gcdBig(g, v<0n?-v:v);
+      if(g===0n) return null;
+      const final = ints.map(v => (v / g));
+      // ensure all positive: if some negative, multiply by -1
+      const anyNegative = final.some(v=> v<0n);
+      const signed = final.map(v=> anyNegative ? -v : v);
+      // convert BigInt to Number safely if small
+      const numeric = signed.map(v=> Number(v.toString()));
+      return { coeffs: numeric.slice(0, lhs.length), coeffsR: numeric.slice(lhs.length), species };
+    }
+
+    document.getElementById('analyze').addEventListener('click', () => {
+      const text = eq.value.trim();
+      const errorEl = document.getElementById('errorMsg'); if(errorEl){ errorEl.style.display='none'; errorEl.textContent=''; }
+      const v = validateEquation(text);
+      if(!v.ok){ if(errorEl){ errorEl.textContent = v.msg; errorEl.style.display = 'block'; } return; }
+      const out = analyzeReaction(text);
+      const res = document.getElementById('result');
+      const badge = document.getElementById('typeBadge');
+      const main = document.getElementById('typeMain');
+      const conf = document.getElementById('confidence');
+      const expl = document.getElementById('explanation');
+      if (out.error) { if(errorEl){ errorEl.textContent = out.error; errorEl.style.display='block'; } return; }
+      res.style.display = 'block';
+      badge.textContent = out.best.toUpperCase();
+      main.textContent = out.best;
+      conf.textContent = 'Confianza aproximada: ' + Math.round(out.confidence * 100) + '%';
+      expl.innerHTML = '';
+      out.steps.forEach(s => { const d = document.createElement('div'); d.className = 'step'; d.innerHTML = '<strong>Pista:</strong> ' + s; expl.appendChild(d); });
+
+      // if redox info, show oxidation states
+      if (out.oxChanges) {
+        const d = document.createElement('div'); d.className = 'step';
+        d.innerHTML = '<strong>Cambios de números de oxidación (estimados):</strong><br>' +
+          '<pre style="white-space:pre-wrap;color:var(--muted);font-size: 12px;">Lado reactivos: ' + JSON.stringify(out.oxChanges.lhsOx) + '\nLado productos: ' + JSON.stringify(out.oxChanges.rhsOx) + '</pre>';
+        expl.appendChild(d);
+      }
+
+      // intentar balancear y mostrar
+      try{
+        const bal = balanceEquationRational(text);
+        const be = document.getElementById('balancedEq');
+        if(be){
+          if(bal){
+            const lhsParts = [];
+            for(let i=0;i<bal.coeffs.length;i++){
+              const c = bal.coeffs[i]; const s = bal.species[i].raw;
+              const html = (c>1? (c + '&nbsp;') : '') + toChemPreview(s);
+              lhsParts.push(html);
+            }
+            const rhsParts = [];
+            for(let i=0;i<bal.coeffsR.length;i++){
+              const c = bal.coeffsR[i]; const s = bal.species[i+bal.coeffs.length].raw;
+              const html = (c>1? (c + '&nbsp;') : '') + toChemPreview(s);
+              rhsParts.push(html);
+            }
+            be.innerHTML = 'Ecuación balanceada: ' + lhsParts.join(' + ') + ' → ' + rhsParts.join(' + ');
+          } else {
+            be.textContent = 'No se pudo balancear automáticamente.';
+          }
+        }
+      }catch(e){ console.warn('balance error', e); }
+
+    });
+
+    // OCR handling
+    let lastOcrText = '';
+    const photoInput = document.getElementById('photoInput');
+    const imgPreview = document.getElementById('imgPreview');
+    photoInput.addEventListener('change', (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      const url = URL.createObjectURL(f); imgPreview.src = url; imgPreview.style.display = 'block'; lastOcrText = '';
+    });
+    // OCR: carga el worker bajo demanda y permite cancelar
+    let currentWorker = null;
+    document.getElementById('runOCR').addEventListener('click', async () => {
+      const f = photoInput.files[0]; if (!f) { alert('Selecciona una imagen primero'); return; }
+      document.getElementById('ocrProgress').style.display = 'block';
+      document.getElementById('cancelOCR').style.display = '';
+      try{
+        currentWorker = Tesseract.createWorker({
+          logger: m => {
+            if (m.status === 'recognizing text' && m.progress) { document.getElementById('ocrProgress').value = m.progress; }
+          }
+        });
+        await currentWorker.load();
+        await currentWorker.loadLanguage('spa+eng');
+        await currentWorker.initialize('spa+eng');
+        const { data: { text } } = await currentWorker.recognize(f);
+        lastOcrText = text.trim();
+        alert('OCR completado — texto extraído (revisa y corrige antes de insertar)');
+      }catch(e){
+        console.error('OCR error or cancelled', e);
+        alert('OCR cancelado o falló: ' + (e && e.message ? e.message : 'error'));
+      }finally{
+        try{ if(currentWorker) await currentWorker.terminate(); }catch(e){}
+        currentWorker = null;
+        document.getElementById('ocrProgress').style.display = 'none';
+        document.getElementById('cancelOCR').style.display = 'none';
+      }
+    });
+
+    document.getElementById('cancelOCR').addEventListener('click', async () => {
+      if(currentWorker){
+        try{ await currentWorker.terminate(); }catch(e){}
+        currentWorker = null;
+      }
+      document.getElementById('ocrProgress').style.display = 'none';
+      document.getElementById('cancelOCR').style.display = 'none';
+      alert('OCR cancelado');
+    });
+
+    document.getElementById('insertOCR').addEventListener('click', () => {
+      if (!lastOcrText) return alert('No hay texto OCR extraído. Ejecuta "Extraer texto (OCR)" primero.');
+      // clean OCR text before inserting
+      const cleaned = cleanOcrText(lastOcrText);
+      eq.value = cleaned.replace(/→/g, '->'); updatePreview();
+    });
+
+    // insert on paste (clean some unicode subscripts -> ASCII _digits?)
+    eq.addEventListener('input', () => updatePreview());
+
+  </script>
+</body>
+</html>
